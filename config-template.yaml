@@ -1,0 +1,340 @@
+# MiSub custom remote template for Mihomo
+# Based on common community configuration patterns and Mihomo official schema.
+# Strategy groups and routing rules are kept aligned with the project's approved files.
+# MiSub documented placeholders: <%proxies%>, <%fileName%>, <%interval%>.
+# Do not add <%rules%> here: routing rules are explicitly maintained below.
+
+# ==================== General ====================
+mixed-port: 7890
+allow-lan: true
+bind-address: "*"
+mode: rule
+log-level: info
+ipv6: false
+tcp-concurrent: true
+unified-delay: true
+find-process-mode: strict
+
+# Keep controller local to this machine. Do not expose it to LAN/WireGuard.
+external-controller: 127.0.0.1:9090
+
+# Persist selected proxies and Fake-IP mappings across restarts.
+profile:
+  store-selected: true
+  store-fake-ip: true
+
+# ==================== GEO data ====================
+geodata-mode: true
+geodata-loader: memconservative
+geo-auto-update: true
+geo-update-interval: 72
+geox-url:
+  geoip: "https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geoip.dat"
+  geosite: "https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geosite.dat"
+  mmdb: "https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/country.mmdb"
+
+# ==================== Sniffer ====================
+sniffer:
+  enable: true
+  force-dns-mapping: true
+  parse-pure-ip: true
+  override-destination: true
+  sniff:
+    HTTP:
+      ports: [80, 8080-8880]
+      override-destination: true
+    TLS:
+      ports: [443, 8443]
+    QUIC:
+      ports: [443, 8443]
+
+# ==================== TUN ====================
+# Deliberately disabled: this profile uses ordinary proxy ports and LAN/WireGuard access.
+tun:
+  enable: false
+
+# ==================== DNS ====================
+dns:
+  enable: true
+  listen: 0.0.0.0:1053
+  ipv6: false
+  enhanced-mode: fake-ip
+  fake-ip-range: 198.18.0.1/16
+  fake-ip-filter:
+    - "geosite:private"
+    - "+.lan"
+    - "+.local"
+  use-hosts: true
+  use-system-hosts: true
+  cache-algorithm: arc
+  default-nameserver:
+    - 223.5.5.5
+    - 119.29.29.29
+  proxy-server-nameserver:
+    - 223.5.5.5
+    - 119.29.29.29
+  direct-nameserver:
+    - 223.5.5.5
+    - 119.29.29.29
+  nameserver:
+    - "https://1.1.1.1/dns-query"
+    - "https://8.8.8.8/dns-query"
+  nameserver-policy:
+    "geosite:cn,private":
+      - "https://223.5.5.5/dns-query"
+      - "https://119.29.29.29/dns-query"
+
+# ==================== Proxies from MiSub ====================
+proxies:
+<%proxies%>
+
+# ==================== Project proxy groups ====================
+proxy-groups:
+  - name: URLtest香港
+    type: url-test
+    include-all: true
+    filter: "(?i)(香港|港|\\bHK\\b|\\bHKG\\b|Hong[ ._-]?Kong)"
+    exclude-filter: "(?i)((家宽|家用宽带|原生住宅|住宅|Residential|ISP)|(IPLC|IEPL)|(倍率[：:]?\\s*(2\\.[0-9]*[1-9][0-9]*|[3-9]([.][0-9]+)?|[1-9][0-9]+([.][0-9]+)?)|(2\\.[0-9]*[1-9][0-9]*|[3-9]([.][0-9]+)?|[1-9][0-9]+([.][0-9]+)?)\\s*(倍|x|×)|x\\s*(2\\.[0-9]*[1-9][0-9]*|[3-9]([.][0-9]+)?|[1-9][0-9]+([.][0-9]+)?)))"
+
+  - name: URLtest日本
+    type: url-test
+    include-all: true
+    filter: "(?i)(日本|\\bJP\\b|\\bJPN\\b|Japan)"
+    exclude-filter: "(?i)((家宽|家用宽带|原生住宅|住宅|Residential|ISP)|(IPLC|IEPL)|(倍率[：:]?\\s*(2\\.[0-9]*[1-9][0-9]*|[3-9]([.][0-9]+)?|[1-9][0-9]+([.][0-9]+)?)|(2\\.[0-9]*[1-9][0-9]*|[3-9]([.][0-9]+)?|[1-9][0-9]+([.][0-9]+)?)\\s*(倍|x|×)|x\\s*(2\\.[0-9]*[1-9][0-9]*|[3-9]([.][0-9]+)?|[1-9][0-9]+([.][0-9]+)?)))"
+
+  - name: URLtest台湾
+    type: url-test
+    include-all: true
+    filter: "(?i)(台湾|台灣|\\bTW\\b|\\bTWN\\b|Taiwan)"
+    exclude-filter: "(?i)((家宽|家用宽带|原生住宅|住宅|Residential|ISP)|(IPLC|IEPL)|(倍率[：:]?\\s*(2\\.[0-9]*[1-9][0-9]*|[3-9]([.][0-9]+)?|[1-9][0-9]+([.][0-9]+)?)|(2\\.[0-9]*[1-9][0-9]*|[3-9]([.][0-9]+)?|[1-9][0-9]+([.][0-9]+)?)\\s*(倍|x|×)|x\\s*(2\\.[0-9]*[1-9][0-9]*|[3-9]([.][0-9]+)?|[1-9][0-9]+([.][0-9]+)?)))"
+
+  - name: URLtest韩国
+    type: url-test
+    include-all: true
+    filter: "(?i)(韩国|韓國|\\bKR\\b|\\bKOR\\b|Korea)"
+    exclude-filter: "(?i)((家宽|家用宽带|原生住宅|住宅|Residential|ISP)|(IPLC|IEPL)|(倍率[：:]?\\s*(2\\.[0-9]*[1-9][0-9]*|[3-9]([.][0-9]+)?|[1-9][0-9]+([.][0-9]+)?)|(2\\.[0-9]*[1-9][0-9]*|[3-9]([.][0-9]+)?|[1-9][0-9]+([.][0-9]+)?)\\s*(倍|x|×)|x\\s*(2\\.[0-9]*[1-9][0-9]*|[3-9]([.][0-9]+)?|[1-9][0-9]+([.][0-9]+)?)))"
+
+  - name: URLtest美国
+    type: url-test
+    include-all: true
+    filter: "(?i)(美国|美國|\\bUS\\b|\\bUSA\\b|United[ ._-]?States|America)"
+    exclude-filter: "(?i)((家宽|家用宽带|原生住宅|住宅|Residential|ISP)|(IPLC|IEPL)|(倍率[：:]?\\s*(2\\.[0-9]*[1-9][0-9]*|[3-9]([.][0-9]+)?|[1-9][0-9]+([.][0-9]+)?)|(2\\.[0-9]*[1-9][0-9]*|[3-9]([.][0-9]+)?|[1-9][0-9]+([.][0-9]+)?)\\s*(倍|x|×)|x\\s*(2\\.[0-9]*[1-9][0-9]*|[3-9]([.][0-9]+)?|[1-9][0-9]+([.][0-9]+)?)))"
+
+  # ==================== 负载均衡（普通线路） ====================
+  - name: 负载均衡香港
+    type: load-balance
+    strategy: consistent-hashing
+    include-all: true
+    filter: "(?i)(香港|港|\\bHK\\b|\\bHKG\\b|Hong[ ._-]?Kong)"
+    exclude-filter: "(?i)((家宽|家用宽带|原生住宅|住宅|Residential|ISP)|(IPLC|IEPL)|(倍率[：:]?\\s*(2\\.[0-9]*[1-9][0-9]*|[3-9]([.][0-9]+)?|[1-9][0-9]+([.][0-9]+)?)|(2\\.[0-9]*[1-9][0-9]*|[3-9]([.][0-9]+)?|[1-9][0-9]+([.][0-9]+)?)\\s*(倍|x|×)|x\\s*(2\\.[0-9]*[1-9][0-9]*|[3-9]([.][0-9]+)?|[1-9][0-9]+([.][0-9]+)?)))"
+
+  - name: 负载均衡日本
+    type: load-balance
+    strategy: consistent-hashing
+    include-all: true
+    filter: "(?i)(日本|\\bJP\\b|\\bJPN\\b|Japan)"
+    exclude-filter: "(?i)((家宽|家用宽带|原生住宅|住宅|Residential|ISP)|(IPLC|IEPL)|(倍率[：:]?\\s*(2\\.[0-9]*[1-9][0-9]*|[3-9]([.][0-9]+)?|[1-9][0-9]+([.][0-9]+)?)|(2\\.[0-9]*[1-9][0-9]*|[3-9]([.][0-9]+)?|[1-9][0-9]+([.][0-9]+)?)\\s*(倍|x|×)|x\\s*(2\\.[0-9]*[1-9][0-9]*|[3-9]([.][0-9]+)?|[1-9][0-9]+([.][0-9]+)?)))"
+
+  - name: 负载均衡台湾
+    type: load-balance
+    strategy: consistent-hashing
+    include-all: true
+    filter: "(?i)(台湾|台灣|\\bTW\\b|\\bTWN\\b|Taiwan)"
+    exclude-filter: "(?i)((家宽|家用宽带|原生住宅|住宅|Residential|ISP)|(IPLC|IEPL)|(倍率[：:]?\\s*(2\\.[0-9]*[1-9][0-9]*|[3-9]([.][0-9]+)?|[1-9][0-9]+([.][0-9]+)?)|(2\\.[0-9]*[1-9][0-9]*|[3-9]([.][0-9]+)?|[1-9][0-9]+([.][0-9]+)?)\\s*(倍|x|×)|x\\s*(2\\.[0-9]*[1-9][0-9]*|[3-9]([.][0-9]+)?|[1-9][0-9]+([.][0-9]+)?)))"
+
+  - name: 负载均衡韩国
+    type: load-balance
+    strategy: consistent-hashing
+    include-all: true
+    filter: "(?i)(韩国|韓國|\\bKR\\b|\\bKOR\\b|Korea)"
+    exclude-filter: "(?i)((家宽|家用宽带|原生住宅|住宅|Residential|ISP)|(IPLC|IEPL)|(倍率[：:]?\\s*(2\\.[0-9]*[1-9][0-9]*|[3-9]([.][0-9]+)?|[1-9][0-9]+([.][0-9]+)?)|(2\\.[0-9]*[1-9][0-9]*|[3-9]([.][0-9]+)?|[1-9][0-9]+([.][0-9]+)?)\\s*(倍|x|×)|x\\s*(2\\.[0-9]*[1-9][0-9]*|[3-9]([.][0-9]+)?|[1-9][0-9]+([.][0-9]+)?)))"
+
+  - name: 负载均衡美国
+    type: load-balance
+    strategy: consistent-hashing
+    include-all: true
+    filter: "(?i)(美国|美國|\\bUS\\b|\\bUSA\\b|United[ ._-]?States|America)"
+    exclude-filter: "(?i)((家宽|家用宽带|原生住宅|住宅|Residential|ISP)|(IPLC|IEPL)|(倍率[：:]?\\s*(2\\.[0-9]*[1-9][0-9]*|[3-9]([.][0-9]+)?|[1-9][0-9]+([.][0-9]+)?)|(2\\.[0-9]*[1-9][0-9]*|[3-9]([.][0-9]+)?|[1-9][0-9]+([.][0-9]+)?)\\s*(倍|x|×)|x\\s*(2\\.[0-9]*[1-9][0-9]*|[3-9]([.][0-9]+)?|[1-9][0-9]+([.][0-9]+)?)))"
+
+  # ==================== 家宽 ====================
+  - name: 家宽日本
+    type: url-test
+    include-all: true
+    filter: "(?i)((日本|\\bJP\\b|\\bJPN\\b|Japan).*(家宽|家用宽带|原生住宅|住宅|Residential|ISP)|(家宽|家用宽带|原生住宅|住宅|Residential|ISP).*(日本|\\bJP\\b|\\bJPN\\b|Japan))"
+
+  - name: 家宽台湾
+    type: url-test
+    include-all: true
+    filter: "(?i)((台湾|台灣|\\bTW\\b|\\bTWN\\b|Taiwan).*(家宽|家用宽带|原生住宅|住宅|Residential|ISP)|(家宽|家用宽带|原生住宅|住宅|Residential|ISP).*(台湾|台灣|\\bTW\\b|\\bTWN\\b|Taiwan))"
+
+  - name: 家宽韩国
+    type: url-test
+    include-all: true
+    filter: "(?i)((韩国|韓國|\\bKR\\b|\\bKOR\\b|Korea).*(家宽|家用宽带|原生住宅|住宅|Residential|ISP)|(家宽|家用宽带|原生住宅|住宅|Residential|ISP).*(韩国|韓國|\\bKR\\b|\\bKOR\\b|Korea))"
+
+  - name: 家宽美国
+    type: url-test
+    include-all: true
+    filter: "(?i)((美国|美國|\\bUS\\b|\\bUSA\\b|United[ ._-]?States|America).*(家宽|家用宽带|原生住宅|住宅|Residential|ISP)|(家宽|家用宽带|原生住宅|住宅|Residential|ISP).*(美国|美國|\\bUS\\b|\\bUSA\\b|United[ ._-]?States|America))"
+
+  # ==================== 高倍率（严格大于 2） ====================
+  - name: 高倍率香港
+    type: url-test
+    include-all: true
+    filter: "(?i)((香港|港|\\bHK\\b|\\bHKG\\b|Hong[ ._-]?Kong).*(倍率[：:]?\\s*(2\\.[0-9]*[1-9][0-9]*|[3-9]([.][0-9]+)?|[1-9][0-9]+([.][0-9]+)?)|(2\\.[0-9]*[1-9][0-9]*|[3-9]([.][0-9]+)?|[1-9][0-9]+([.][0-9]+)?)\\s*(倍|x|×)|x\\s*(2\\.[0-9]*[1-9][0-9]*|[3-9]([.][0-9]+)?|[1-9][0-9]+([.][0-9]+)?))|(倍率[：:]?\\s*(2\\.[0-9]*[1-9][0-9]*|[3-9]([.][0-9]+)?|[1-9][0-9]+([.][0-9]+)?)|(2\\.[0-9]*[1-9][0-9]*|[3-9]([.][0-9]+)?|[1-9][0-9]+([.][0-9]+)?)\\s*(倍|x|×)|x\\s*(2\\.[0-9]*[1-9][0-9]*|[3-9]([.][0-9]+)?|[1-9][0-9]+([.][0-9]+)?)).*(香港|港|\\bHK\\b|\\bHKG\\b|Hong[ ._-]?Kong))"
+
+  - name: 高倍率日本
+    type: url-test
+    include-all: true
+    filter: "(?i)((日本|\\bJP\\b|\\bJPN\\b|Japan).*(倍率[：:]?\\s*(2\\.[0-9]*[1-9][0-9]*|[3-9]([.][0-9]+)?|[1-9][0-9]+([.][0-9]+)?)|(2\\.[0-9]*[1-9][0-9]*|[3-9]([.][0-9]+)?|[1-9][0-9]+([.][0-9]+)?)\\s*(倍|x|×)|x\\s*(2\\.[0-9]*[1-9][0-9]*|[3-9]([.][0-9]+)?|[1-9][0-9]+([.][0-9]+)?))|(倍率[：:]?\\s*(2\\.[0-9]*[1-9][0-9]*|[3-9]([.][0-9]+)?|[1-9][0-9]+([.][0-9]+)?)|(2\\.[0-9]*[1-9][0-9]*|[3-9]([.][0-9]+)?|[1-9][0-9]+([.][0-9]+)?)\\s*(倍|x|×)|x\\s*(2\\.[0-9]*[1-9][0-9]*|[3-9]([.][0-9]+)?|[1-9][0-9]+([.][0-9]+)?)).*(日本|\\bJP\\b|\\bJPN\\b|Japan))"
+
+  - name: 高倍率台湾
+    type: url-test
+    include-all: true
+    filter: "(?i)((台湾|台灣|\\bTW\\b|\\bTWN\\b|Taiwan).*(倍率[：:]?\\s*(2\\.[0-9]*[1-9][0-9]*|[3-9]([.][0-9]+)?|[1-9][0-9]+([.][0-9]+)?)|(2\\.[0-9]*[1-9][0-9]*|[3-9]([.][0-9]+)?|[1-9][0-9]+([.][0-9]+)?)\\s*(倍|x|×)|x\\s*(2\\.[0-9]*[1-9][0-9]*|[3-9]([.][0-9]+)?|[1-9][0-9]+([.][0-9]+)?))|(倍率[：:]?\\s*(2\\.[0-9]*[1-9][0-9]*|[3-9]([.][0-9]+)?|[1-9][0-9]+([.][0-9]+)?)|(2\\.[0-9]*[1-9][0-9]*|[3-9]([.][0-9]+)?|[1-9][0-9]+([.][0-9]+)?)\\s*(倍|x|×)|x\\s*(2\\.[0-9]*[1-9][0-9]*|[3-9]([.][0-9]+)?|[1-9][0-9]+([.][0-9]+)?)).*(台湾|台灣|\\bTW\\b|\\bTWN\\b|Taiwan))"
+
+  - name: 高倍率韩国
+    type: url-test
+    include-all: true
+    filter: "(?i)((韩国|韓國|\\bKR\\b|\\bKOR\\b|Korea).*(倍率[：:]?\\s*(2\\.[0-9]*[1-9][0-9]*|[3-9]([.][0-9]+)?|[1-9][0-9]+([.][0-9]+)?)|(2\\.[0-9]*[1-9][0-9]*|[3-9]([.][0-9]+)?|[1-9][0-9]+([.][0-9]+)?)\\s*(倍|x|×)|x\\s*(2\\.[0-9]*[1-9][0-9]*|[3-9]([.][0-9]+)?|[1-9][0-9]+([.][0-9]+)?))|(倍率[：:]?\\s*(2\\.[0-9]*[1-9][0-9]*|[3-9]([.][0-9]+)?|[1-9][0-9]+([.][0-9]+)?)|(2\\.[0-9]*[1-9][0-9]*|[3-9]([.][0-9]+)?|[1-9][0-9]+([.][0-9]+)?)\\s*(倍|x|×)|x\\s*(2\\.[0-9]*[1-9][0-9]*|[3-9]([.][0-9]+)?|[1-9][0-9]+([.][0-9]+)?)).*(韩国|韓國|\\bKR\\b|\\bKOR\\b|Korea))"
+
+  - name: 高倍率美国
+    type: url-test
+    include-all: true
+    filter: "(?i)((美国|美國|\\bUS\\b|\\bUSA\\b|United[ ._-]?States|America).*(倍率[：:]?\\s*(2\\.[0-9]*[1-9][0-9]*|[3-9]([.][0-9]+)?|[1-9][0-9]+([.][0-9]+)?)|(2\\.[0-9]*[1-9][0-9]*|[3-9]([.][0-9]+)?|[1-9][0-9]+([.][0-9]+)?)\\s*(倍|x|×)|x\\s*(2\\.[0-9]*[1-9][0-9]*|[3-9]([.][0-9]+)?|[1-9][0-9]+([.][0-9]+)?))|(倍率[：:]?\\s*(2\\.[0-9]*[1-9][0-9]*|[3-9]([.][0-9]+)?|[1-9][0-9]+([.][0-9]+)?)|(2\\.[0-9]*[1-9][0-9]*|[3-9]([.][0-9]+)?|[1-9][0-9]+([.][0-9]+)?)\\s*(倍|x|×)|x\\s*(2\\.[0-9]*[1-9][0-9]*|[3-9]([.][0-9]+)?|[1-9][0-9]+([.][0-9]+)?)).*(美国|美國|\\bUS\\b|\\bUSA\\b|United[ ._-]?States|America))"
+
+  # ==================== 专线（IPLC / IEPL） ====================
+  - name: 专线香港
+    type: url-test
+    include-all: true
+    filter: "(?i)((香港|港|\\bHK\\b|\\bHKG\\b|Hong[ ._-]?Kong).*(IPLC|IEPL)|(IPLC|IEPL).*(香港|港|\\bHK\\b|\\bHKG\\b|Hong[ ._-]?Kong))"
+
+  - name: 专线日本
+    type: url-test
+    include-all: true
+    filter: "(?i)((日本|\\bJP\\b|\\bJPN\\b|Japan).*(IPLC|IEPL)|(IPLC|IEPL).*(日本|\\bJP\\b|\\bJPN\\b|Japan))"
+
+  - name: 专线台湾
+    type: url-test
+    include-all: true
+    filter: "(?i)((台湾|台灣|\\bTW\\b|\\bTWN\\b|Taiwan).*(IPLC|IEPL)|(IPLC|IEPL).*(台湾|台灣|\\bTW\\b|\\bTWN\\b|Taiwan))"
+
+  - name: 专线韩国
+    type: url-test
+    include-all: true
+    filter: "(?i)((韩国|韓國|\\bKR\\b|\\bKOR\\b|Korea).*(IPLC|IEPL)|(IPLC|IEPL).*(韩国|韓國|\\bKR\\b|\\bKOR\\b|Korea))"
+
+  - name: 专线美国
+    type: url-test
+    include-all: true
+    filter: "(?i)((美国|美國|\\bUS\\b|\\bUSA\\b|United[ ._-]?States|America).*(IPLC|IEPL)|(IPLC|IEPL).*(美国|美國|\\bUS\\b|\\bUSA\\b|United[ ._-]?States|America))"
+
+  # ==================== 手动选择（业务策略组） ====================
+  - name: CN地区
+    type: select
+    proxies:
+      - 负载均衡香港
+      - 负载均衡日本
+      - 负载均衡台湾
+      - 负载均衡韩国
+      - 负载均衡美国
+      - DIRECT
+
+  - name: Google
+    type: select
+    proxies:
+      - URLtest日本
+      - URLtest台湾
+      - URLtest韩国
+      - URLtest美国
+
+  - name: YouTube
+    type: select
+    proxies:
+      - 负载均衡日本
+      - 负载均衡台湾
+      - 负载均衡韩国
+      - 负载均衡美国
+
+  - name: AI
+    type: select
+    proxies:
+      - 家宽日本
+      - 家宽美国
+      - URLtest日本
+      - URLtest美国
+      - 高倍率日本
+      - 高倍率美国
+
+  - name: 默认策略
+    type: select
+    proxies:
+      - 负载均衡日本
+      - 负载均衡台湾
+      - 负载均衡韩国
+      - 负载均衡美国
+
+# ==================== Project rule providers and rules ====================
+rule-providers: 和 rules: 合并进主配置。
+# 外部规则源：MetaCubeX/meta-rules-dat（Mihomo meta 分支）
+# MRS 仅用于 domain / ipcidr 行为；本文件使用 domain。
+# 本地规则放在外部规则集之前，作为关键域名的兜底。
+
+rule-providers:
+  google:
+    type: http
+    behavior: domain
+    format: mrs
+    interval: 86400
+    path: ./ruleset/google.mrs
+    url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/google.mrs"
+
+  youtube:
+    type: http
+    behavior: domain
+    format: mrs
+    interval: 86400
+    path: ./ruleset/youtube.mrs
+    url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/youtube.mrs"
+
+  cn:
+    type: http
+    behavior: domain
+    format: mrs
+    interval: 86400
+    path: ./ruleset/cn.mrs
+    url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/cn.mrs"
+
+rules:
+  # 局域网与本机
+  - DOMAIN,localhost,DIRECT
+  - DOMAIN-SUFFIX,localhost,DIRECT
+  - DOMAIN-SUFFIX,local,DIRECT
+  - GEOIP,private,DIRECT,no-resolve
+
+  # 本地关键域名兜底：不依赖外部规则集是否成功下载
+  - DOMAIN-SUFFIX,github.com,默认策略
+
+  # Google 本地兜底
+  - DOMAIN-SUFFIX,google.com,Google
+  - DOMAIN-SUFFIX,googleapis.com,Google
+  - DOMAIN-SUFFIX,gstatic.com,Google
+  - DOMAIN-SUFFIX,googleusercontent.com,Google
+
+  # YouTube 本地兜底
+  - DOMAIN-SUFFIX,youtube.com,YouTube
+  - DOMAIN-SUFFIX,youtu.be,YouTube
+  - DOMAIN-SUFFIX,youtube-nocookie.com,YouTube
+  - DOMAIN-SUFFIX,ytimg.com,YouTube
+  - DOMAIN-SUFFIX,googlevideo.com,YouTube
+
+  # 外部规则集
+  - RULE-SET,google,Google
+  - RULE-SET,youtube,YouTube
+  - RULE-SET,cn,CN地区
+
+  # 中国大陆 IP 兜底
+  - GEOIP,CN,CN地区,no-resolve
+
+  # 未命中以上规则的流量
+  - MATCH,默认策略
