@@ -1,0 +1,65 @@
+# Mihomo rule-providers and rules
+# 与 proxy-groups.yaml 分开维护。
+# 将本文件对应的 rule-providers: 和 rules: 合并进主配置。
+# 外部规则源：MetaCubeX/meta-rules-dat（Mihomo meta 分支）
+# MRS 仅用于 domain / ipcidr 行为；本文件使用 domain。
+# 本地规则放在外部规则集之前，作为关键域名的兜底。
+
+rule-providers:
+  google:
+    type: http
+    behavior: domain
+    format: mrs
+    interval: 86400
+    path: ./ruleset/google.mrs
+    url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/google.mrs"
+
+  youtube:
+    type: http
+    behavior: domain
+    format: mrs
+    interval: 86400
+    path: ./ruleset/youtube.mrs
+    url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/youtube.mrs"
+
+  cn:
+    type: http
+    behavior: domain
+    format: mrs
+    interval: 86400
+    path: ./ruleset/cn.mrs
+    url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/cn.mrs"
+
+rules:
+  # 局域网与本机
+  - DOMAIN,localhost,DIRECT
+  - DOMAIN-SUFFIX,localhost,DIRECT
+  - DOMAIN-SUFFIX,local,DIRECT
+  - GEOIP,private,DIRECT,no-resolve
+
+  # 本地关键域名兜底：不依赖外部规则集是否成功下载
+  - DOMAIN-SUFFIX,github.com,默认策略
+
+  # Google 本地兜底
+  - DOMAIN-SUFFIX,google.com,Google
+  - DOMAIN-SUFFIX,googleapis.com,Google
+  - DOMAIN-SUFFIX,gstatic.com,Google
+  - DOMAIN-SUFFIX,googleusercontent.com,Google
+
+  # YouTube 本地兜底
+  - DOMAIN-SUFFIX,youtube.com,YouTube
+  - DOMAIN-SUFFIX,youtu.be,YouTube
+  - DOMAIN-SUFFIX,youtube-nocookie.com,YouTube
+  - DOMAIN-SUFFIX,ytimg.com,YouTube
+  - DOMAIN-SUFFIX,googlevideo.com,YouTube
+
+  # 外部规则集
+  - RULE-SET,google,Google
+  - RULE-SET,youtube,YouTube
+  - RULE-SET,cn,CN地区
+
+  # 中国大陆 IP 兜底
+  - GEOIP,CN,CN地区,no-resolve
+
+  # 未命中以上规则的流量
+  - MATCH,默认策略
